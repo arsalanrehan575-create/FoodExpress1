@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodExpress — Food Delivery App</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --pink:#e21b70; --pink2:#ff4f9a; --ink:#191922; --muted:#72727f;
+  --bg:#f6f7fb; --line:#ececf3; --green:#0aa06e; --r:16px;
+}
+body{font-family:'Segoe UI',Roboto,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;padding-bottom:0}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit;outline:none;border:none;background:transparent;color:inherit}
+img{max-width:100%}
+
+/* ---------- TOPBAR ---------- */
+.topbar{position:sticky;top:0;z-index:60;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.06);
+  padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:nowrap}
+.logo{font-size:20px;font-weight:800;color:var(--pink);display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap;letter-spacing:-.4px}
+.logo span.dot{color:var(--ink)}
+.loc{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;
+  padding:9px 13px;border-radius:11px;background:#f6f7fb;white-space:nowrap;font-weight:600;transition:.2s}
+.loc:hover{background:#ececf6}
+.topsearch{flex:1;max-width:520px;display:flex;align-items:center;gap:9px;background:#f6f7fb;
+  border-radius:12px;padding:11px 15px;border:1.5px solid transparent;transition:.2s}
+.topsearch:focus-within{border-color:var(--pink);background:#fff;box-shadow:0 0 0 4px rgba(226,27,112,.08)}
+.topsearch input{flex:1;font-size:14px}
+.topright{margin-left:auto;display:flex;align-items:center;gap:6px}
+.iconbtn{display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:11px;font-size:13px;
+  font-weight:600;color:var(--ink);transition:.18s;position:relative}
+.iconbtn:hover{background:#f6f7fb}
+.iconbtn .badge{position:absolute;top:2px;left:22px;background:var(--pink);color:#fff;font-size:10px;
+  font-weight:800;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.iconbtn .lbl{white-space:nowrap}
+
+/* ---------- VIEW ---------- */
+#view{max-width:1180px;margin:0 auto;padding:22px 18px 90px;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- HERO ---------- */
+.hero{background:linear-gradient(120deg,#e21b70 0%,#ff5c9d 55%,#ffb36b 100%);border-radius:22px;
+  padding:38px 32px;color:#fff;position:relative;overflow:hidden;margin-bottom:26px}
+.hero::after{content:'🍔🍕🍜';position:absolute;right:-10px;bottom:-25px;font-size:120px;opacity:.16;letter-spacing:-20px}
+.hero h1{font-size:31px;font-weight:800;letter-spacing:-.6px;margin-bottom:8px;line-height:1.2}
+.hero p{opacity:.94;font-size:14.5px;margin-bottom:20px;max-width:520px}
+.hero-search{display:flex;background:#fff;border-radius:13px;padding:6px;max-width:480px;box-shadow:0 8px 26px rgba(0,0,0,.14)}
+.hero-search input{flex:1;padding:11px 15px;font-size:14px;color:var(--ink)}
+.hero-search button{background:var(--pink);color:#fff;padding:11px 22px;border-radius:9px;font-weight:700;font-size:14px}
+.hero-stats{display:flex;gap:26px;margin-top:22px;flex-wrap:wrap}
+.hero-stats div{font-size:12.5px;opacity:.92}
+.hero-stats b{display:block;font-size:19px;margin-bottom:2px}
+
+/* ---------- CATEGORIES ---------- */
+.sec-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 15px}
+.sec-title h2{font-size:20px;font-weight:800;letter-spacing:-.4px}
+.sec-title small{color:var(--muted);font-size:13px;font-weight:600}
+.cats{display:flex;gap:11px;overflow-x:auto;padding-bottom:8px;margin-bottom:26px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:88px;padding:14px 10px;
+  background:#fff;border-radius:15px;font-size:12px;font-weight:700;color:var(--muted);
+  border:2px solid transparent;transition:.2s;cursor:pointer}
+.cat .ic{font-size:26px;line-height:1}
+.cat:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.cat.active{border-color:var(--pink);color:var(--pink);background:#fff5f9}
+
+/* ---------- RESTAURANT GRID ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:20px}
+.rcard{background:#fff;border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.24s;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid var(--line)}
+.rcard:hover{transform:translateY(-5px);box-shadow:0 16px 34px rgba(0,0,0,.12)}
+.rthumb{height:132px;display:flex;align-items:center;justify-content:center;font-size:62px;position:relative}
+.rthumb .off{position:absolute;left:11px;bottom:11px;background:var(--pink);color:#fff;font-size:11px;
+  font-weight:800;padding:5px 10px;border-radius:8px;letter-spacing:.2px}
+.rinfo{padding:14px 15px 16px}
+.rinfo h3{font-size:15.5px;font-weight:800;margin-bottom:4px;letter-spacing:-.2px}
+.rinfo .cu{font-size:12.5px;color:var(--muted);margin-bottom:11px}
+.rmeta{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--muted);font-weight:600;flex-wrap:wrap}
+.rmeta .pill{display:flex;align-items:center;gap:4px;background:#f6f7fb;padding:4px 9px;border-radius:7px}
+.rmeta .pill.rate{background:#e9f9f1;color:var(--green)}
+
+/* ---------- RESTAURANT PAGE ---------- */
+.rbanner{border-radius:20px;height:170px;display:flex;align-items:center;justify-content:center;font-size:96px;position:relative;margin-bottom:0}
+.backbtn{position:absolute;top:15px;left:15px;background:rgba(255,255,255,.94);padding:9px 15px;border-radius:11px;
+  font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.14)}
+.rcard-head{background:#fff;border-radius:0 0 20px 20px;padding:20px 24px 22px;margin-bottom:26px;box-shadow:0 6px 22px rgba(0,0,0,.06)}
+.rcard-head h1{font-size:25px;font-weight:800;letter-spacing:-.5px;margin-bottom:5px}
+.rcard-head .cu{color:var(--muted);font-size:13.5px;margin-bottom:15px}
+.badges{display:flex;gap:11px;flex-wrap:wrap}
+.badges .b{display:flex;align-items:center;gap:6px;background:#f6f7fb;padding:8px 13px;border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.badges .b.g{background:#e9f9f1;color:var(--green)}
+
+.menu-sec{margin-bottom:26px}
+.menu-sec h3{font-size:17px;font-weight:800;margin-bottom:13px;padding-left:11px;border-left:4px solid var(--pink);letter-spacing:-.3px}
+.mitem{background:#fff;border-radius:14px;padding:15px 17px;display:flex;gap:14px;align-items:center;
+  margin-bottom:11px;border:1px solid var(--line);transition:.18s}
+.mitem:hover{box-shadow:0 6px 18px rgba(0,0,0,.07)}
+.mitem .mic{width:56px;height:56px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  font-size:28px;background:linear-gradient(135deg,#fdf1f6,#f6f7fb);flex-shrink:0}
+.mitem .mtxt{flex:1;min-width:0}
+.mitem .mtxt h4{font-size:14.5px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:7px}
+.pop-tag{background:#fff3e0;color:#e07b00;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:.3px}
+.mitem .mtxt p{font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:6px}
+.mitem .mtxt .pr{font-size:14px;font-weight:800;color:var(--pink)}
+.addbtn{background:var(--pink);color:#fff;font-size:12.5px;font-weight:800;padding:9px 18px;border-radius:10px;
+  transition:.18s;white-space:nowrap}
+.addbtn:hover{background:#c4155f;transform:scale(1.05)}
+.addbtn:active{transform:scale(.96)}
+
+/* ---------- CART ---------- */
+.citem{background:#fff;border-radius:14px;padding:15px 17px;display:flex;gap:14px;align-items:center;
+  margin-bottom:11px;border:1px solid var(--line)}
+.citem .mic{width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#fdf1f6,#f6f7fb);
+  display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0}
+.citem .ct{flex:1;min-width:0}
+.citem .ct h4{font-size:14px;font-weight:700;margin-bottom:3px}
+.citem .ct span{font-size:12px;color:var(--muted)}
+.citem .ct .pr{display:block;font-size:13.5px;font-weight:800;color:var(--pink);margin-top:5px}
+.qty{display:flex;align-items:center;gap:2px;background:#f6f7fb;border-radius:10px;padding:4px}
+.qty button{width:29px;height:29px;border-radius:8px;font-size:17px;font-weight:800;color:var(--pink);
+  display:flex;align-items:center;justify-content:center;transition:.15s}
+.qty button:hover{background:#fff}
+.qty span{min-width:26px;text-align:center;font-size:13.5px;font-weight:800}
+
+.bill{background:#fff;border-radius:16px;padding:20px 22px;border:1px solid var(--line);margin-top:18px}
+.bill h3{font-size:16px;font-weight:800;margin-bottom:14px}
+.brow{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);margin-bottom:10px;font-weight:600}
+.brow.total{border-top:2px dashed var(--line);padding-top:13px;margin-top:14px;font-size:16.5px;
+  font-weight:800;color:var(--ink)}
+.brow.disc{color:var(--green)}
+
+.bigbtn{width:100%;background:var(--pink);color:#fff;padding:16px;border-radius:14px;font-size:15px;
+  font-weight:800;margin-top:16px;transition:.2s;letter-spacing:.2px}
+.bigbtn:hover{background:#c4155f;box-shadow:0 10px 26px rgba(226,27,112,.32)}
+.bigbtn:active{transform:scale(.985)}
+.bigbtn:disabled{background:#d6d6e0;cursor:not-allowed;box-shadow:none}
+
+.empty{text-align:center;padding:70px 20px}
+.empty .ic{font-size:74px;margin-bottom:16px;opacity:.85}
+.empty h3{font-size:20px;font-weight:800;margin-bottom:8px}
+.empty p{color:var(--muted);font-size:14px;margin-bottom:22px}
+
+/* ---------- CHECKOUT ---------- */
+.panel{background:#fff;border-radius:16px;padding:20px 22px;border:1px solid var(--line);margin-bottom:16px}
+.panel h3{font-size:16px;font-weight:800;margin-bottom:15px;display:flex;align-items:center;gap:8px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:7px}
+.field input,.field textarea{width:100%;background:#f6f7fb;border-radius:11px;padding:13px 15px;font-size:14px;
+  border:1.5px solid transparent;transition:.18s;resize:none}
+.field input:focus,.field textarea:focus{border-color:var(--pink);background:#fff;box-shadow:0 0 0 4px rgba(226,27,112,.07)}
+.payopt{display:flex;align-items:center;gap:13px;padding:14px 16px;border:2px solid var(--line);
+  border-radius:12px;margin-bottom:10px;cursor:pointer;transition:.18s;font-size:14px;font-weight:600}
+.payopt:hover{background:#fafafd}
+.payopt.sel{border-color:var(--pink);background:#fff5f9}
+.payopt .pic{font-size:22px}
+.payopt .radio{width:19px;height:19px;border-radius:50%;border:2px solid #d5d5e0;margin-left:auto;transition:.18s}
+.payopt.sel .radio{border-color:var(--pink);border-width:6px}
+
+/* ---------- TRACK ---------- */
+.track-hero{background:linear-gradient(120deg,#0aa06e,#3ed598);border-radius:20px;padding:30px;color:#fff;text-align:center;margin-bottom:20px}
+.track-hero .ic{font-size:56px;margin-bottom:10px;animation:bounce 1.4s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.track-hero h2{font-size:23px;font-weight:800;margin-bottom:6px}
+.track-hero p{opacity:.94;font-size:13.5px}
+.steps{background:#fff;border-radius:16px;padding:24px 22px;border:1px solid var(--line);margin-bottom:16px}
+.step{display:flex;gap:15px;position:relative;padding-bottom:26px}
+.step:last-child{padding-bottom:0}
+.step::before{content:'';position:absolute;left:15px;top:33px;bottom:0;width:2px;background:var(--line)}
+.step:last-child::before{display:none}
+.step.done::before{background:var(--green)}
+.step .dot{width:32px;height:32px;border-radius:50%;background:#f0f0f6;display:flex;align-items:center;
+  justify-content:center;font-size:15px;flex-shrink:0;z-index:1;transition:.3s}
+.step.done .dot{background:var(--green);color:#fff}
+.step.active .dot{background:var(--pink);color:#fff;box-shadow:0 0 0 6px rgba(226,27,112,.15);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 6px rgba(226,27,112,.15)}50%{box-shadow:0 0 0 12px rgba(226,27,112,.05)}}
+.step .st h4{font-size:14.5px;font-weight:700;margin-bottom:3px}
+.step .st p{font-size:12.5px;color:var(--muted)}
+
+/* ---------- ORDERS ---------- */
+.ocard{background:#fff;border-radius:15px;padding:18px 20px;border:1px solid var(--line);margin-bottom:13px;
+  display:flex;gap:15px;align-items:center;cursor:pointer;transition:.18s}
+.ocard:hover{box-shadow:0 8px 22px rgba(0,0,0,.08)}
+.ocard .oic{width:52px;height:52px;border-radius:13px;background:linear-gradient(135deg,#fdf1f6,#f6f7fb);
+  display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0}
+.ocard .ot{flex:1;min-width:0}
+.ocard .ot h4{font-size:14.5px;font-weight:800;margin-bottom:3px}
+.ocard .ot p{font-size:12.5px;color:var(--muted)}
+.ostatus{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;background:#e9f9f1;color:var(--green);white-space:nowrap}
+.ostatus.active{background:#fff3e0;color:#e07b00}
+
+/* ---------- PROFILE ---------- */
+.pcard{background:linear-gradient(120deg,#e21b70,#ff5c9d);border-radius:20px;padding:30px;color:#fff;
+  display:flex;align-items:center;gap:20px;margin-bottom:20px}
+.avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.24);display:flex;
+  align-items:center;justify-content:center;font-size:33px;flex-shrink:0}
+.pcard h2{font-size:21px;font-weight:800;margin-bottom:4px}
+.pcard p{font-size:13px;opacity:.92}
+.prow{display:flex;align-items:center;gap:14px;background:#fff;padding:17px 20px;border-radius:13px;
+  margin-bottom:10px;border:1px solid var(--line);font-size:14px;font-weight:600;cursor:pointer;transition:.18s}
+.prow:hover{background:#fafafd}
+.prow .pic{font-size:20px}
+.prow .arrow{margin-left:auto;color:var(--muted)}
+
+/* ---------- BOTTOM NAV ---------- */
+.bottomnav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;z-index:55;
+  box-shadow:0 -2px 18px rgba(0,0,0,.09);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+.bnitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;
+  font-weight:700;color:var(--muted);padding:6px 0;position:relative;transition:.15s}
+.bnitem .bi{font-size:20px}
+.bnitem.on{color:var(--pink)}
+.bnitem .badge{position:absolute;top:0;right:calc(50% - 20px);background:var(--pink);color:#fff;font-size:9.5px;
+  font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+
+/* ---------- MODAL / TOAST ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(20,20,30,.55);backdrop-filter:blur(4px);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:18px;animation:fade .2s}
+.modal{background:#fff;border-radius:20px;padding:28px 26px;max-width:400px;width:100%;
+  animation:pop .26s cubic-bezier(.2,1.2,.4,1);max-height:90vh;overflow-y:auto}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h3{font-size:19px;font-weight:800;margin-bottom:7px;letter-spacing:-.3px}
+.modal p.sub{font-size:13.5px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.modal .mact{display:flex;gap:10px;margin-top:20px}
+.modal .mact button{flex:1;padding:14px;border-radius:12px;font-weight:800;font-size:14px}
+.mact .ghost{background:#f2f2f7;color:var(--ink)}
+.mact .solid{background:var(--pink);color:#fff}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translate(-50%,22px);background:#191922;color:#fff;
+  padding:13px 24px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:200;opacity:0;
+  transition:.3s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.28);max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.footer{text-align:center;padding:32px 18px 20px;color:var(--muted);font-size:12.5px;line-height:1.7}
+
+/* ---------- AUTH / WELCOME ---------- */
+#authScreen{position:fixed;inset:0;z-index:500;background:linear-gradient(160deg,#e21b70 0%,#ff5c9d 45%,#ffb36b 100%);
+  display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.auth-card{background:#fff;border-radius:26px;padding:34px 30px;max-width:420px;width:100%;
+  box-shadow:0 30px 80px rgba(0,0,0,.28);animation:pop .4s cubic-bezier(.2,1.2,.4,1)}
+.auth-logo{text-align:center;margin-bottom:26px}
+.auth-logo .em{font-size:64px;line-height:1;display:block;margin-bottom:6px}
+.auth-logo h1{font-size:26px;font-weight:800;color:var(--pink);letter-spacing:-.6px}
+.auth-logo h1 span{color:var(--ink)}
+.auth-logo p{font-size:13px;color:var(--muted);margin-top:5px;font-weight:600}
+.auth-tabs{display:flex;background:#f6f7fb;border-radius:12px;padding:5px;margin-bottom:22px}
+.auth-tabs button{flex:1;padding:11px;border-radius:9px;font-size:13.5px;font-weight:800;color:var(--muted);transition:.2s}
+.auth-tabs button.on{background:#fff;color:var(--pink);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.auth-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.auth-actions .primary{background:var(--pink);color:#fff;padding:16px;border-radius:13px;font-size:15px;
+  font-weight:800;transition:.2s;letter-spacing:.2px}
+.auth-actions .primary:hover{background:#c4155f;box-shadow:0 10px 26px rgba(226,27,112,.32)}
+.auth-actions .ghost{background:#f2f2f7;color:var(--ink);padding:14px;border-radius:13px;font-size:14px;font-weight:700}
+.auth-note{text-align:center;font-size:11.5px;color:var(--muted);margin-top:18px;line-height:1.6}
+
+#welcomeScreen{position:fixed;inset:0;z-index:400;background:linear-gradient(160deg,#e21b70 0%,#ff5c9d 50%,#ffb36b 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;
+  padding:30px;animation:fade .4s ease}
+#welcomeScreen .wem{font-size:96px;margin-bottom:16px;animation:bounce 1.6s infinite}
+#welcomeScreen h1{font-size:30px;font-weight:800;letter-spacing:-.6px;margin-bottom:10px}
+#welcomeScreen p{font-size:15px;opacity:.94;margin-bottom:8px}
+#welcomeScreen .wsub{font-size:13px;opacity:.85;max-width:420px;line-height:1.6;margin-bottom:34px}
+#welcomeScreen .wbtn{background:#fff;color:var(--pink);padding:17px 46px;border-radius:15px;font-size:16px;
+  font-weight:800;box-shadow:0 14px 40px rgba(0,0,0,.22);transition:.22s;letter-spacing:.2px}
+#welcomeScreen .wbtn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 20px 50px rgba(0,0,0,.28)}
+#welcomeScreen .wstats{display:flex;gap:30px;margin-top:38px;flex-wrap:wrap;justify-content:center}
+#welcomeScreen .wstats div{font-size:12px;opacity:.9}
+#welcomeScreen .wstats b{display:block;font-size:20px;margin-bottom:3px}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:860px){
+  .topbar{padding:9px 12px;gap:9px}
+  .logo{font-size:17px}
+  .loc{display:none}
+  .topsearch{padding:9px 12px}
+  .topsearch input{font-size:13px}
+  .iconbtn .lbl{display:none}
+  .iconbtn{padding:9px 11px;font-size:16px}
+  .iconbtn .badge{left:17px;top:0}
+  .bottomnav{display:flex}
+  #view{padding:16px 13px 90px}
+  .hero{padding:26px 20px;border-radius:18px}
+  .hero h1{font-size:23px}
+  .hero p{font-size:13px}
+  .hero-stats{gap:18px}
+  .hero-stats b{font-size:16px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:13px}
+  .rthumb{height:100px;font-size:46px}
+  .rinfo{padding:11px 12px 13px}
+  .rinfo h3{font-size:13.5px}
+  .rinfo .cu{font-size:11px;margin-bottom:8px}
+  .rmeta{font-size:10.5px;gap:6px}
+  .rmeta .pill{padding:3px 7px}
+  .rcard-head{padding:16px 18px 18px}
+  .rcard-head h1{font-size:20px}
+  .rbanner{height:130px;font-size:70px}
+  .mitem{padding:12px 13px;gap:11px}
+  .mitem .mic{width:46px;height:46px;font-size:23px}
+  .mitem .mtxt h4{font-size:13px}
+  .mitem .mtxt p{font-size:11px}
+  .addbtn{padding:8px 14px;font-size:11.5px}
+  .citem{padding:12px 13px}
+  .panel,.bill,.steps{padding:16px 17px}
+  .pcard{padding:22px;gap:15px}
+  .avatar{width:58px;height:58px;font-size:27px}
+  .pcard h2{font-size:17px}
+  .hero-search input{padding:10px 12px;font-size:13px}
+  .hero-search button{padding:10px 16px;font-size:13px}
+  .auth-card{padding:28px 22px}
+  .auth-logo .em{font-size:52px}
+  .auth-logo h1{font-size:22px}
+  #welcomeScreen .wem{font-size:74px}
+  #welcomeScreen h1{font-size:24px}
+  #welcomeScreen .wbtn{padding:15px 36px;font-size:15px}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="em">🐼</span>
+      <h1>Food<span>Express</span></h1>
+      <p>Pakistan's fastest food delivery</p>
+    </div>
+    <div class="auth-tabs">
+      <button id="tabLogin" class="on" onclick="app.authTab('login')">Login</button>
+      <button id="tabSignup" onclick="app.authTab('signup')">Sign Up</button>
+    </div>
+    <div class="field"><label>Full Name</label><input id="aName" placeholder="e.g. Ali Khan"></div>
+    <div class="field"><label>Phone Number</label><input id="aPhone" placeholder="03XX-XXXXXXX" maxlength="15"></div>
+    <div class="field" id="cityField" style="display:none"><label>City / Area</label><input id="aCity" placeholder="e.g. Gulberg III, Lahore"></div>
+    <div class="auth-actions">
+      <button class="primary" id="authActionBtn" onclick="app.doAuth()">Login</button>
+      <button class="ghost" onclick="app.guestLogin()">Continue as Guest</button>
+    </div>
+    <div class="auth-note">By continuing you agree to our Terms &amp; Privacy Policy.<br>Demo app — no real data is stored on any server.</div>
+  </div>
+</div>
+
+<!-- ================= WELCOME SCREEN ================= -->
+<div id="welcomeScreen" style="display:none">
+  <div class="wem">🎉</div>
+  <h1 id="welcomeName">Welcome to FoodExpress!</h1>
+  <p>You're all set to order</p>
+  <div class="wsub">Delicious food from 500+ restaurants, delivered hot &amp; fresh to your doorstep in 30 minutes.</div>
+  <button class="wbtn" onclick="app.enterApp()">Start Ordering →</button>
+  <div class="wstats">
+    <div><b>500+</b>Restaurants</div>
+    <div><b>30 min</b>Avg Delivery</div>
+    <div><b>4.7★</b>App Rating</div>
+  </div>
+</div>
+
+<!-- ================= TOP BAR ================= -->
+<header class="topbar" id="topbar" style="display:none">
+  <div class="logo" onclick="app.go('home')">🐼 Food<span class="dot">Express</span></div>
+  <div class="loc" onclick="app.pickLocation()">📍 <span id="locText">Gulberg III, Lahore</span> ▾</div>
+  <div class="topsearch">
+    🔍 <input id="topSearch" placeholder="Search restaurants or dishes..." oninput="app.onSearch(this.value)">
+  </div>
+  <div class="topright">
+    <button class="iconbtn" onclick="app.go('orders')">📦 <span class="lbl">Orders</span></button>
+    <button class="iconbtn" onclick="app.go('cart')">🛒<span class="badge" id="cartBadge">0</span></button>
+    <button class="iconbtn" id="authBtn" onclick="app.openAuth()">👤 <span class="lbl">Login</span></button>
+  </div>
+</header>
+
+<!-- ================= MAIN VIEW ================= -->
+<main id="view" style="display:none"></main>
+
+<!-- ================= BOTTOM NAV ================= -->
+<nav class="bottomnav" id="bottomnav" style="display:none">
+  <button class="bnitem" id="bn-home" onclick="app.go('home')"><span class="bi">🏠</span>Home</button>
+  <button class="bnitem" id="bn-orders" onclick="app.go('orders')"><span class="bi">📦</span>Orders</button>
+  <button class="bnitem" id="bn-cart" onclick="app.go('cart')"><span class="bi">🛒</span>Cart<span class="badge" id="cartBadge2" style="display:none">0</span></button>
+  <button class="bnitem" id="bn-profile" onclick="app.go('profile')"><span class="bi">👤</span>Profile</button>
+</nav>
+
+<div id="modalRoot"></div>
+
+<script>
+/* =========================================================
+   DATA
+   ========================================================= */
+const DATA = [
+{id:'r1',name:'Biryani House',emoji:'🍛',grad:'linear-gradient(135deg,#f7b733,#fc4a1a)',cuisine:'Biryani • Desi • BBQ',rating:4.5,reviews:'1.2k',time:'25-35 min',fee:50,min:250,discount:'20% OFF',menu:[
+ {id:'r1m1',n:'Chicken Biryani',d:'Fragrant basmati rice layered with spicy chicken & raita',p:380,c:'Biryani',e:'🍛',pop:true},
+ {id:'r1m2',n:'Beef Pulao',d:'Slow-cooked beef chunks with seasoned rice',p:450,c:'Biryani',e:'🍚'},
+ {id:'r1m3',n:'Chicken Karahi (Half)',d:'Tomato & green chilli karahi, served with naan',p:850,c:'Karahi',e:'🍲',pop:true},
+ {id:'r1m4',n:'Seekh Kebab (4 pcs)',d:'Charcoal grilled minced meat kebab',p:350,c:'BBQ',e:'🍢'},
+ {id:'r1m5',n:'Raita',d:'Fresh yogurt with cucumber & mint',p:80,c:'Sides',e:'🥣'},
+ {id:'r1m6',n:'Gulab Jamun (2 pcs)',d:'Soft milk dumplings in sugar syrup',p:120,c:'Dessert',e:'🍮'}
+]},
+{id:'r2',name:'Pizza Palace',emoji:'🍕',grad:'linear-gradient(135deg,#ff9a9e,#fad0c4)',cuisine:'Pizza • Italian • Fast Food',rating:4.3,reviews:'860',time:'30-40 min',fee:60,min:400,discount:'Buy 1 Get 1',menu:[
+ {id:'r2m1',n:'Chicken Fajita Pizza (M)',d:'Grilled chicken, peppers, onions & mozzarella',p:1150,c:'Pizza',e:'🍕',pop:true},
+ {id:'r2m2',n:'Pepperoni Pizza (M)',d:'Classic pepperoni with extra cheese',p:1250,c:'Pizza',e:'🍕'},
+ {id:'r2m3',n:'Garlic Bread',d:'Toasted bread with garlic butter & herbs',p:280,c:'Sides',e:'🥖'},
+ {id:'r2m4',n:'Chicken Wings (6 pcs)',d:'Spicy buffalo wings with dip',p:520,c:'Sides',e:'🍗',pop:true},
+ {id:'r2m5',n:'Pasta Alfredo',d:'Creamy white sauce pasta with chicken',p:690,c:'Pasta',e:'🍝'},
+ {id:'r2m6',n:'Choco Lava Cake',d:'Warm chocolate cake with molten centre',p:250,c:'Dessert',e:'🍫'}
+]},
+{id:'r3',name:'Burger Barn',emoji:'🍔',grad:'linear-gradient(135deg,#f6d365,#fda085)',cuisine:'Burger • Fast Food • Fries',rating:4.2,reviews:'2.1k',time:'20-30 min',fee:40,min:200,discount:'Free Fries',menu:[
+ {id:'r3m1',n:'Zinger Burger',d:'Crispy chicken fillet with mayo & lettuce',p:390,c:'Burgers',e:'🍔',pop:true},
+ {id:'r3m2',n:'Beef Cheese Burger',d:'Juicy beef patty with cheddar cheese',p:450,c:'Burgers',e:'🍔'},
+ {id:'r3m3',n:'Chicken Loaded Fries',d:'Fries topped with chicken, cheese sauce & jalapeño',p:350,c:'Fries',e:'🍟',pop:true},
+ {id:'r3m4',n:'Hot Wings (6 pcs)',d:'Crispy spicy wings with dip',p:420,c:'Sides',e:'🍗'},
+ {id:'r3m5',n:'Coleslaw',d:'Fresh cabbage & carrot salad',p:120,c:'Sides',e:'🥗'},
+ {id:'r3m6',n:'Cold Drink (Regular)',d:'Chilled soft drink',p:100,c:'Drinks',e:'🥤'}
+]},
+{id:'r4',name:'Dragon Wok',emoji:'🍜',grad:'linear-gradient(135deg,#ff6a88,#ff99ac)',cuisine:'Chinese • Thai • Asian',rating:4.4,reviews:'640',time:'35-45 min',fee:70,min:500,discount:'15% OFF',menu:[
+ {id:'r4m1',n:'Chicken Chowmein',d:'Stir-fried noodles with chicken & veggies',p:480,c:'Noodles',e:'🍜',pop:true},
+ {id:'r4m2',n:'Chicken Manchurian',d:'Crispy chicken in tangy manchurian sauce',p:620,c:'Chicken',e:'🍛',pop:true},
+ {id:'r4m3',n:'Beef Chilli Dry',d:'Spicy dry chilli beef with capsicum',p:720,c:'Beef',e:'🥘'},
+ {id:'r4m4',n:'Egg Fried Rice',d:'Wok-tossed rice with egg & spring onion',p:420,c:'Rice',e:'🍚'},
+ {id:'r4m5',n:'Hot & Sour Soup',d:'Chicken soup with a spicy-sour kick',p:280,c:'Soup',e:'🥣'},
+ {id:'r4m6',n:'Spring Rolls (4 pcs)',d:'Crispy veg spring rolls with dip',p:320,c:'Starters',e:'🥟'}
+]},
+{id:'r5',name:'Karahi King',emoji:'🍲',grad:'linear-gradient(135deg,#c79081,#dfa579)',cuisine:'Desi • Karahi • BBQ',rating:4.6,reviews:'3.4k',time:'30-40 min',fee:60,min:500,discount:'25% OFF',menu:[
+ {id:'r5m1',n:'Chicken Karahi (Full)',d:'Signature karahi with fresh tomatoes & ginger',p:1650,c:'Karahi',e:'🍲',pop:true},
+ {id:'r5m2',n:'Mutton Karahi (Half)',d:'Tender mutton in spicy tomato gravy',p:1800,c:'Karahi',e:'🥘'},
+ {id:'r5m3',n:'Chicken Tikka (4 pcs)',d:'Charcoal grilled tikka with masala',p:640,c:'BBQ',e:'🍗',pop:true},
+ {id:'r5m4',n:'Nihari',d:'Slow-cooked beef nihari with naan',p:750,c:'Desi',e:'🍛'},
+ {id:'r5m5',n:'Tandoori Naan (2 pcs)',d:'Fresh from the tandoor',p:80,c:'Sides',e:'🫓'},
+ {id:'r5m6',n:'Kheer',d:'Traditional rice pudding with pistachio',p:180,c:'Dessert',e:'🍮'}
+]},
+{id:'r6',name:'Sweet Tooth',emoji:'🍰',grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)',cuisine:'Dessert • Bakery • Ice Cream',rating:4.7,reviews:'980',time:'15-25 min',fee:30,min:150,discount:'Free Delivery',menu:[
+ {id:'r6m1',n:'Chocolate Fudge Cake',d:'Rich 1lb fudge cake',p:850,c:'Cakes',e:'🍰',pop:true},
+ {id:'r6m2',n:'Cheesecake Slice',d:'New York style baked cheesecake',p:420,c:'Cakes',e:'🍰'},
+ {id:'r6m3',n:'Ice Cream Tub (500ml)',d:'Premium vanilla ice cream',p:650,c:'Ice Cream',e:'🍨',pop:true},
+ {id:'r6m4',n:'Brownie (2 pcs)',d:'Fudgy walnut brownies',p:280,c:'Bakery',e:'🍫'},
+ {id:'r6m5',n:'Fresh Croissant',d:'Buttery flaky croissant',p:220,c:'Bakery',e:'🥐'},
+ {id:'r6m6',n:'Kunafa',d:'Middle eastern cheese pastry with syrup',p:520,c:'Dessert',e:'🍯'}
+]},
+{id:'r7',name:'Grill & Chill',emoji:'🍗',grad:'linear-gradient(135deg,#ee9ca7,#ffdde1)',cuisine:'BBQ • Fast Food • Wings',rating:4.1,reviews:'1.5k',time:'25-35 min',fee:50,min:300,discount:'10% OFF',menu:[
+ {id:'r7m1',n:'Full Grilled Chicken',d:'Whole roasted chicken with peri sauce',p:1250,c:'Grill',e:'🍗',pop:true},
+ {id:'r7m2',n:'Wings Platter (12 pcs)',d:'Mixed flavour wings with fries',p:890,c:'Wings',e:'🍗',pop:true},
+ {id:'r7m3',n:'Beef Steak',d:'Grilled tenderloin with mushroom sauce',p:1450,c:'Grill',e:'🥩'},
+ {id:'r7m4',n:'Loaded Nachos',d:'Nachos with cheese, salsa & jalapeño',p:450,c:'Starters',e:'🌮'},
+ {id:'r7m5',n:'French Fries',d:'Crispy golden fries',p:200,c:'Sides',e:'🍟'},
+ {id:'r7m6',n:'Mint Margarita',d:'Chilled mint & lemon cooler',p:180,c:'Drinks',e:'🍹'}
+]},
+{id:'r8',name:'Chai Khana',emoji:'☕',grad:'linear-gradient(135deg,#89f7fe,#66a6ff)',cuisine:'Cafe • Tea • Drinks',rating:4.5,reviews:'720',time:'15-25 min',fee:30,min:150,discount:'20% OFF',menu:[
+ {id:'r8m1',n:'Doodh Patti Chai',d:'Traditional milky tea',p:120,c:'Tea',e:'☕',pop:true},
+ {id:'r8m2',n:'Karak Chai',d:'Strong cardamom tea',p:150,c:'Tea',e:'🫖'},
+ {id:'r8m3',n:'Cold Coffee',d:'Blended iced coffee with cream',p:320,c:'Coffee',e:'🥤',pop:true},
+ {id:'r8m4',n:'Chicken Club Sandwich',d:'Triple decker sandwich with fries',p:480,c:'Sandwich',e:'🥪'},
+ {id:'r8m5',n:'Chocolate Shake',d:'Thick chocolate milkshake',p:380,c:'Shakes',e:'🥛'},
+ {id:'r8m6',n:'Samosa (2 pcs)',d:'Crispy potato samosas with chutney',p:100,c:'Snacks',e:'🥟'}
+]}
+];
+
+const CATS = [
+ {k:'All',i:'🍽️'},{k:'Biryani',i:'🍛'},{k:'Pizza',i:'🍕'},{k:'Burger',i:'🍔'},
+ {k:'Chinese',i:'🍜'},{k:'Desi',i:'🍲'},{k:'BBQ',i:'🍢'},{k:'Dessert',i:'🍰'},{k:'Cafe',i:'☕'}
+];
+
+const money = n => 'Rs ' + Number(n).toLocaleString('en-PK');
+const PLATFORM_FEE = 20;
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  view:'home',
+  restId:null,
+  cart:[],
+  orders:[],
+  user:null,
+  address:'House 12, Street 5, Gulberg III, Lahore',
+  city:'Gulberg III, Lahore',
+  search:'',
+  cat:'All',
+  pay:'cod',
+  promo:null,
+  trackId:null,
+  trackStep:0,
+  authMode:'login'
+};
+
+/* =========================================================
+   APP
+   ========================================================= */
+const app = {
+  _timer:null,
+
+  /* ---------- PERSISTENCE ---------- */
+  save(){
+    try{
+      localStorage.setItem('fx_state', JSON.stringify({
+        cart:state.cart, orders:state.orders, user:state.user,
+        address:state.address, city:state.city
+      }));
+    }catch(e){}
+  },
+  load(){
+    try{
+      const raw = localStorage.getItem('fx_state');
+      if(!raw) return;
+      const d = JSON.parse(raw);
+      if(d.cart) state.cart = d.cart;
+      if(d.orders) state.orders = d.orders;
+      if(d.user) state.user = d.user;
+      if(d.address) state.address = d.address;
+      if(d.city) state.city = d.city;
+    }catch(e){}
+  },
+
+  /* ---------- INIT ---------- */
+  init(){
+    this.load();
+    // Hide app elements, show auth screen
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('view').style.display = 'none';
+    document.getElementById('bottomnav').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('welcomeScreen').style.display = 'none';
+    this.updateBadges();
+  },
+
+  /* ---------- AUTH FLOW ---------- */
+  authTab(mode){
+    state.authMode = mode;
+    const isLogin = mode === 'login';
+    document.getElementById('tabLogin').classList.toggle('on', isLogin);
+    document.getElementById('tabSignup').classList.toggle('on', !isLogin);
+    document.getElementById('cityField').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('authActionBtn').textContent = isLogin ? 'Login' : 'Create Account';
+  },
+
+  doAuth(){
+    const n = document.getElementById('aName').value.trim();
+    const p = document.getElementById('aPhone').value.trim();
+    const c = document.getElementById('aCity')?.value.trim();
+    if(n.length < 2) return this.toast('Please enter your name');
+    if(p.length < 7) return this.toast('Please enter a valid phone number');
+
+    state.user = {
+      name: n,
+      phone: p,
+      joined: new Date().toLocaleDateString('en-PK', {month:'short', year:'numeric'})
+    };
+    if(c && c.length > 2){
+      state.city = c;
+      state.address = c;
+    }
+    this.save();
+    this.showWelcome();
+  },
+
+  guestLogin(){
+    state.user = { name: 'Guest User', phone: '03XX-XXXXXXX', joined: new Date().toLocaleDateString('en-PK', {month:'short', year:'numeric'}) };
+    this.save();
+    this.showWelcome();
+  },
+
+  showWelcome(){
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('welcomeScreen').style.display = 'flex';
+    const first = state.user.name.split(' ')[0];
+    document.getElementById('welcomeName').textContent = `Welcome, ${first}! 🎉`;
+    this.toast('✅ Logged in as ' + first);
+  },
+
+  enterApp(){
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('topbar').style.display = 'flex';
+    document.getElementById('view').style.display = 'block';
+    document.getElementById('bottomnav').style.display = 'flex';
+    document.getElementById('locText').textContent = state.city;
+    this.updateAuthBtn();
+    this.render();
+    this.updateBadges();
+  },
+
+  logoutToAuth(){
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('view').style.display = 'none';
+    document.getElementById('bottomnav').style.display = 'none';
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('aName').value = '';
+    document.getElementById('aPhone').value = '';
+    document.getElementById('aCity').value = '';
+    state.authMode = 'login';
+    this.authTab('login');
+  },
+
+  /* ---------- HELPERS ---------- */
+  rest(id){ return DATA.find(r=>r.id===id); },
+  cartCount(){ return state.cart.reduce((a,b)=>a+b.qty,0); },
+  subtotal(){ return state.cart.reduce((a,b)=>a+b.p*b.qty,0); },
+  cartRest(){ return state.cart.length ? this.rest(state.cart[0].restId) : null; },
+  deliveryFee(){ const r=this.cartRest(); return r ? r.fee : 0; },
+  discount(){
+    if(!state.promo) return 0;
+    const sub = this.subtotal();
+    if(state.promo==='SAVE20') return Math.min(Math.round(sub*0.2), 200);
+    if(state.promo==='FLAT100') return sub>=600 ? 100 : 0;
+    return 0;
+  },
+  total(){ return Math.max(0, this.subtotal()+this.deliveryFee()+PLATFORM_FEE-this.discount()); },
+
+  updateBadges(){
+    const n = this.cartCount();
+    const b1 = document.getElementById('cartBadge');
+    const b2 = document.getElementById('cartBadge2');
+    if(b1){ b1.textContent = n; b1.style.display = n?'flex':'none'; }
+    if(b2){ b2.textContent = n; b2.style.display = n?'flex':'none'; }
+  },
+  updateAuthBtn(){
+    const b = document.getElementById('authBtn');
+    if(!b) return;
+    b.innerHTML = state.user
+      ? `<span style="font-size:15px">👤</span> <span class="lbl">${state.user.name.split(' ')[0]}</span>`
+      : `👤 <span class="lbl">Login</span>`;
+    b.onclick = () => state.user ? app.go('profile') : app.openAuth();
+  },
+
+  /* ---------- NAVIGATION ---------- */
+  go(view, payload){
+    if(this._timer){ clearInterval(this._timer); this._timer=null; }
+    state.view = view;
+    if(view==='restaurant') state.restId = payload;
+    if(view==='track') { state.trackId = payload || state.trackId; }
+    window.scrollTo({top:0,behavior:'smooth'});
+    this.render();
+    this.updateBadges();
+  },
+
+  onSearch(v){
+    state.search = v;
+    if(state.view!=='home'){ state.view='home'; }
+    this.render();
+  },
+
+  setCat(k){
+    state.cat = k;
+    this.render();
+  },
+
+  pickLocation(){
+    const opts = ['Gulberg III, Lahore','DHA Phase 5, Lahore','Model Town, Lahore','Bahria Town, Rawalpindi','F-7 Markaz, Islamabad','Clifton Block 5, Karachi'];
+    const m = this.modal(`
+      <h3>📍 Select your area</h3>
+      <p class="sub">Choose your delivery location</p>
+      ${opts.map(o=>`<div class="payopt" onclick="app.setLoc('${o}')"><span class="pic">📍</span>${o}</div>`).join('')}
+      <div class="mact"><button class="ghost" onclick="app.closeModal()">Cancel</button></div>
+    `);
+    document.getElementById('modalRoot').innerHTML = m;
+  },
+  setLoc(o){
+    state.city = o;
+    document.getElementById('locText').textContent = o;
+    this.save(); this.closeModal(); this.toast('📍 Location set to '+o);
+  },
+
+  /* ---------- MODAL / TOAST ---------- */
+  modal(inner){ return `<div class="modal-bg" onclick="if(event.target===this)app.closeModal()"><div class="modal">${inner}</div></div>`; },
+  closeModal(){ document.getElementById('modalRoot').innerHTML=''; },
+  toast(msg){
+    const old = document.querySelector('.toast'); if(old) old.remove();
+    const t = document.createElement('div');
+    t.className='toast'; t.textContent=msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(()=>t.classList.add('show'));
+    setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),320); }, 2300);
+  },
+  confirmBox(msg, onYes){
+    document.getElementById('modalRoot').innerHTML = this.modal(`
+      <h3>⚠️ Are you sure?</h3>
+      <p class="sub">${msg}</p>
+      <div class="mact">
+        <button class="ghost" onclick="app.closeModal()">Cancel</button>
+        <button class="solid" onclick="app._yes()">Yes, Continue</button>
+      </div>`);
+    this._onYes = onYes;
+  },
+  _yes(){ const f=this._onYes; this._onYes=null; this.closeModal(); if(f) f(); },
+
+  /* ---------- AUTH ---------- */
+  openAuth(){
+    document.getElementById('modalRoot').innerHTML = this.modal(`
+      <h3>👋 Welcome to FoodExpress</h3>
+      <p class="sub">Login or sign up to place your order</p>
+      <div class="field"><label>Full Name</label><input id="aName" placeholder="e.g. Ali Khan"></div>
+      <div class="field"><label>Phone Number</label><input id="aPhone" placeholder="03XX-XXXXXXX" maxlength="15"></div>
+      <div class="mact">
+        <button class="ghost" onclick="app.closeModal()">Cancel</button>
+        <button class="solid" onclick="app.doAuth()">Continue</button>
+      </div>`);
+  },
+  doAuth(){
+    const n = document.getElementById('aName').value.trim();
+    const p = document.getElementById('aPhone').value.trim();
+    if(n.length<2) return this.toast('Please enter your name');
+    if(p.length<7) return this.toast('Please enter a valid phone number');
+    state.user = { name:n, phone:p, joined:new Date().toLocaleDateString('en-PK',{month:'short',year:'numeric'}) };
+    this.save(); this.closeModal(); this.updateAuthBtn();
+    this.toast('✅ Welcome, '+n.split(' ')[0]+'!');
+    this.render();
+  },
+  logout(){
+    this.confirmBox('You will be logged out of your account.', ()=>{
+      state.user=null; this.save(); this.updateAuthBtn();
+      this.logoutToAuth();
+      this.toast('Logged out');
+    });
+  },
+
+  /* ---------- CART ---------- */
+  add(id){
+    const r = DATA.find(x=>x.menu.some(m=>m.id===id));
+    const item = r.menu.find(m=>m.id===id);
+    if(state.cart.length && state.cart[0].restId !== r.id){
+      this.confirmBox(`Your cart has items from <b>${this.rest(state.cart[0].restId).name}</b>. Clear it and add items from <b>${r.name}</b>?`, ()=>{
+        state.cart = []; this._addItem(r,item);
+      });
+      return;
+    }
+    this._addItem(r,item);
+  },
+  _addItem(r,item){
+    const ex = state.cart.find(c=>c.id===item.id);
+    if(ex) ex.qty++;
+    else state.cart.push({id:item.id, name:item.n, price:item.p, qty:1, restId:r.id, emoji:item.e, restName:r.name});
+    this.save(); this.updateBadges();
+    this.toast('🛒 '+item.n+' added');
+    if(state.view==='cart'||state.view==='checkout') this.render();
+  },
+  inc(id){
+    const c = state.cart.find(x=>x.id===id); if(!c) return;
+    c.qty++; this.save(); this.updateBadges(); this.render();
+  },
+  dec(id){
+    const i = state.cart.findIndex(x=>x.id===id); if(i<0) return;
+    state.cart[i].qty--;
+    if(state.cart[i].qty<=0) state.cart.splice(i,1);
+    this.save(); this.updateBadges(); this.render();
+  },
+  removeItem(id){
+    state.cart = state.cart.filter(x=>x.id!==id);
+    this.save(); this.updateBadges(); this.render();
+  },
+  clearCart(){
+    if(!state.cart.length) return;
+    this.confirmBox('Remove all items from your cart?', ()=>{
+      state.cart=[]; state.promo=null; this.save(); this.updateBadges(); this.render(); this.toast('Cart cleared');
+    });
+  },
+  applyPromo(){
+    const v = (document.getElementById('promoInput')?.value||'').trim().toUpperCase();
+    if(v==='SAVE20'){ state.promo='SAVE20'; this.toast('🎉 20% off applied (max Rs 200)'); this.render(); }
+    else if(v==='FLAT100'){ if(this.subtotal()<600) return this.toast('Minimum order Rs 600 required'); state.promo='FLAT100'; this.toast('🎉 Rs 100 off applied'); this.render(); }
+    else this.toast('❌ Invalid promo code');
+  },
+
+  /* ---------- CHECKOUT ---------- */
+  setPay(m){ state.pay=m; this.render(); },
+  setAddr(v){ state.address=v; this.save(); },
+
+  placeOrder(){
+    if(!state.user){ this.openAuth(); return this.toast('Please login first'); }
+    const addr = (document.getElementById('addrInput')?.value||'').trim();
+    if(addr.length<8) return this.toast('Please enter a complete delivery address');
+    state.address = addr;
+
+    const order = {
+      id:'FX'+Math.floor(100000+Math.random()*900000),
+      items: JSON.parse(JSON.stringify(state.cart)),
+      subtotal: this.subtotal(),
+      fee: this.deliveryFee(),
+      platform: PLATFORM_FEE,
+      discount: this.discount(),
+      total: this.total(),
+      address: addr,
+      pay: state.pay,
+      restName: this.cartRest().name,
+      emoji: this.cartRest().emoji,
+      status: 0,
+      time: Date.now()
+    };
+
+    state.orders.unshift(order);
+    state.cart = []; state.promo = null;
+    state.trackId = order.id; state.trackStep = 0;
+    this.save(); this.updateBadges();
+    this.go('track', order.id);
+    this.toast('🎉 Order placed successfully!');
+    this.startTracking();
+  },
+
+  startTracking(){
+    if(this._timer) clearInterval(this._timer);
+    this._timer = setInterval(()=>{
+      const o = state.orders.find(x=>x.id===state.trackId);
+      if(!o || o.status>=4){ clearInterval(this._timer); this._timer=null; return; }
+      o.status++;
+      this.save();
+      if(state.view==='track'){ state.trackStep=o.status; this.render(); }
+      if(o.status===4) this.toast('✅ Your order has been delivered. Enjoy!');
+    }, 5000);
+  },
+
+  openOrder(id){
+    state.trackId = id;
+    this.go('track', id);
+    const o = state.orders.find(x=>x.id===id);
+    if(o && o.status<4) this.startTracking();
+  },
+
+  reorder(id){
+    const o = state.orders.find(x=>x.id===id); if(!o) return;
+    state.cart = o.items.map(i=>({...i}));
+    this.save(); this.updateBadges(); this.go('cart');
+    this.toast('Items added back to cart');
+  },
+
+  /* =========================================================
+     RENDER
+     ========================================================= */
+  render(){
+    const v = state.view;
+    let html = '';
+    if(v==='home') html = this.homeView();
+    else if(v==='restaurant') html = this.restaurantView();
+    else if(v==='cart') html = this.cartView();
+    else if(v==='checkout') html = this.checkoutView();
+    else if(v==='track') html = this.trackView();
+    else if(v==='orders') html = this.ordersView();
+    else if(v==='profile') html = this.profileView();
+    else html = this.homeView();
+
+    document.getElementById('view').innerHTML = html;
+
+    // bottom nav active state
+    ['home','orders','cart','profile'].forEach(k=>{
+      const el = document.getElementById('bn-'+k);
+      if(el) el.classList.toggle('on', k===state.view || (k==='home'&&state.view==='restaurant'));
+    });
+    this.updateBadges();
+  },
+
+  /* ---------------- HOME ---------------- */
+  homeView(){
+    const q = state.search.trim().toLowerCase();
+    const list = DATA.filter(r=>{
+      const catOk = state.cat==='All'
+        || r.cuisine.toLowerCase().includes(state.cat.toLowerCase())
+        || r.name.toLowerCase().includes(state.cat.toLowerCase())
+        || r.menu.some(m=>m.c.toLowerCase().includes(state.cat.toLowerCase()));
+      const qOk = !q
+        || r.name.toLowerCase().includes(q)
+        || r.cuisine.toLowerCase().includes(q)
+        || r.menu.some(m=>m.n.toLowerCase().includes(q));
+      return catOk && qOk;
+    });
+
+    return `
+    <section class="hero">
+      <h1>Hungry? We deliver<br>in 30 minutes ⚡</h1>
+      <p>Order from the best restaurants near you. Hot, fresh & fast — delivered right at your doorstep.</p>
+      <div class="hero-search">
+        <input placeholder="Search for biryani, pizza, burger..." value="${state.search}"
+               oninput="app.onSearch(this.value)">
+        <button onclick="app.toast('🔍 Searching...')">Search</button>
+      </div>
+      <div class="hero-stats">
+        <div><b>500+</b>Restaurants</div>
+        <div><b>30 min</b>Avg Delivery</div>
+        <div><b>4.7★</b>App Rating</div>
+        <div><b>Free</b>On First Order</div>
+      </div>
+    </section>
+
+    <div class="cats">
+      ${CATS.map(c=>`<div class="cat ${state.cat===c.k?'active':''}" onclick="app.setCat('${c.k}')">
+        <span class="ic">${c.i}</span>${c.k}</div>`).join('')}
+    </div>
+
+    <div class="sec-title">
+      <h2>${q ? 'Results for “'+state.search+'”' : (state.cat==='All'?'Popular Restaurants':state.cat+' Places')}</h2>
+      <small>${list.length} found</small>
+    </div>
+
+    ${list.length ? `<div class="grid">${list.map(r=>this.rCard(r)).join('')}</div>`
+      : `<div class="empty"><div class="ic">🔍</div><h3>Nothing found</h3>
+         <p>Try a different search or category</p>
+         <button class="addbtn" onclick="app.setCat('All');app.onSearch('')">Reset Filters</button></div>`}
+
+    <div class="footer">
+      🐼 <b>FoodExpress</b> — Pakistan's fastest food delivery<br>
+      Made with ❤️ | All prices in PKR
+    </div>`;
+  },
+
+  rCard(r){
+    return `<div class="rcard" onclick="app.go('restaurant','${r.id}')">
+      <div class="rthumb" style="background:${r.grad}">
+        ${r.emoji}<span class="off">${r.discount}</span>
+      </div>
+      <div class="rinfo">
+        <h3>${r.name}</h3>
+        <div class="cu">${r.cuisine}</div>
+        <div class="rmeta">
+          <span class="pill rate">★ ${r.rating}</span>
+          <span class="pill">⏱ ${r.time}</span>
+          <span class="pill">🛵 ${r.fee===0?'Free':money(r.fee)}</span>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  /* ---------------- RESTAURANT ---------------- */
+  restaurantView(){
+    const r = this.rest(state.restId);
+    if(!r) return `<div class="empty"><div class="ic">😕</div><h3>Restaurant not found</h3>
+      <button class="addbtn" onclick="app.go('home')">Go Home</button></div>`;
+
+    const groups = {};
+    r.menu.forEach(m=>{ (groups[m.c] = groups[m.c] || []).push(m); });
+
+    return `
+    <div class="rbanner" style="background:${r.grad}">
+      <button class="backbtn" onclick="app.go('home')">← Back</button>
+      ${r.emoji}
+    </div>
+    <div class="rcard-head">
+      <h1>${r.name}</h1>
+      <div class="cu">${r.cuisine}</div>
+      <div class="badges">
+        <span class="b g">★ ${r.rating} (${r.reviews} reviews)</span>
+        <span class="b">⏱ ${r.time}</span>
+        <span class="b">🛵 Delivery ${money(r.fee)}</span>
+        <span class="b">🧾 Min order ${money(r.min)}</span>
+        <span class="b" style="background:#fff3e0;color:#e07b00">🎁 ${r.discount}</span>
+      </div>
+    </div>
+
+    ${Object.keys(groups).map(cat=>`
+      <div class="menu-sec">
+        <h3>${cat}</h3>
+        ${groups[cat].map(m=>{
+          const inCart = state.cart.find(c=>c.id===m.id);
+          return `<div class="mitem">
+            <div class="mic">${m.e}</div>
+            <div class="mtxt">
+              <h4>${m.n} ${m.pop?'<span class="pop-tag">POPULAR</span>':''}</h4>
+              <p>${m.d}</p>
+              <span class="pr">${money(m.p)}</span>
+            </div>
+            ${inCart
+              ? `<div class="qty">
+                   <button onclick="app.dec('${m.id}')">−</button>
+                   <span>${inCart.qty}</span>
+                   <button onclick="app.inc('${m.id}')">+</button>
+                 </div>`
+              : `<button class="addbtn" onclick="app.add('${m.id}')">ADD +</button>`}
+          </div>`;
+        }).join('')}
+      </div>`).join('')}
+
+    <div class="footer">Prices are inclusive of applicable taxes</div>`;
+  },
+
+  /* ---------------- CART ---------------- */
+  cartView(){
+    if(!state.cart.length){
+      return `<div class="empty"><div class="ic">🛒</div><h3>Your cart is empty</h3>
+        <p>Looks like you haven't added anything yet.</p>
+        <button class="addbtn" style="padding:13px 30px;font-size:14px" onclick="app.go('home')">Browse Restaurants</button></div>`;
+    }
+    const r = this.cartRest();
+    return `
+    <div class="sec-title"><h2>🛒 Your Cart</h2>
+      <small style="color:var(--pink);cursor:pointer;font-weight:700" onclick="app.clearCart()">Clear all</small></div>
+
+    <div style="background:#fff;border-radius:14px;padding:13px 17px;margin-bottom:16px;border:1px solid var(--line);
+      display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:700">
+      <span style="font-size:22px">${r.emoji}</span> ${r.name}
+      <span style="margin-left:auto;font-size:12px;color:var(--muted);font-weight:600">⏱ ${r.time}</span>
+    </div>
+
+    ${state.cart.map(c=>`
+      <div class="citem">
+        <div class="mic">${c.emoji}</div>
+        <div class="ct">
+          <h4>${c.name}</h4>
+          <span>${money(c.price)} each</span>
+          <span class="pr">${money(c.price*c.qty)}</span>
+        </div>
+        <div class="qty">
+          <button onclick="app.dec('${c.id}')">−</button>
+          <span>${c.qty}</span>
+          <button onclick="app.inc('${c.id}')">+</button>
+        </div>
+      </div>`).join('')}
+
+    <div class="panel" style="margin-top:16px">
+      <h3>🎟️ Promo Code</h3>
+      <div style="display:flex;gap:9px">
+        <input id="promoInput" placeholder="Try SAVE20 or FLAT100" value="${state.promo||''}"
+          style="flex:1;background:#f6f7fb;border-radius:11px;padding:13px 15px;font-size:13.5px;border:1.5px solid transparent">
+        <button class="addbtn" style="padding:0 22px" onclick="app.applyPromo()">Apply</button>
+      </div>
+      ${state.promo?`<div style="margin-top:10px;font-size:12.5px;color:var(--green);font-weight:700">✅ ${state.promo} applied — you saved ${money(this.discount())}</div>`:''}
+    </div>
+
+    <div class="bill">
+      <h3>🧾 Bill Details</h3>
+      <div class="brow"><span>Subtotal (${this.cartCount()} items)</span><span>${money(this.subtotal())}</span></div>
+      <div class="brow"><span>Delivery Fee</span><span>${money(this.deliveryFee())}</span></div>
+      <div class="brow"><span>Platform Fee</span><span>${money(PLATFORM_FEE)}</span></div>
+      ${this.discount()?`<div class="brow disc"><span>Promo Discount</span><span>− ${money(this.discount())}</span></div>`:''}
+      <div class="brow total"><span>Total</span><span>${money(this.total())}</span></div>
+    </div>
+
+    <button class="bigbtn" onclick="app.go('checkout')">Proceed to Checkout • ${money(this.total())}</button>`;
+  },
+
+  /* ---------------- CHECKOUT ---------------- */
+  checkoutView(){
+    if(!state.cart.length){ this.go('home'); return ''; }
+    const pays = [
+      {k:'cod', i:'💵', t:'Cash on Delivery', s:'Pay when your order arrives'},
+      {k:'card', i:'💳', t:'Credit / Debit Card', s:'Visa, Mastercard, UnionPay'},
+      {k:'wallet', i:'📱', t:'Mobile Wallet', s:'JazzCash, Easypaisa, Nayapay'}
+    ];
+    return `
+    <div class="sec-title"><h2>✅ Checkout</h2>
+      <small style="cursor:pointer;color:var(--pink);font-weight:700" onclick="app.go('cart')">← Back to cart</small></div>
+
+    <div class="panel">
+      <h3>📍 Delivery Address</h3>
+      <div class="field">
+        <label>Complete Address</label>
+        <textarea id="addrInput" rows="2" oninput="app.setAddr(this.value)"
+          placeholder="House / Flat, Street, Area, City">${state.address}</textarea>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Delivery Instructions (optional)</label>
+        <input placeholder="e.g. Ring the bell twice, leave at door">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>💳 Payment Method</h3>
+      ${pays.map(p=>`<div class="payopt ${state.pay===p.k?'sel':''}" onclick="app.setPay('${p.k}')">
+        <span class="pic">${p.i}</span>
+        <div><div>${p.t}</div>
+          <div style="font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px">${p.s}</div></div>
+        <span class="radio"></span>
+      </div>`).join('')}
+    </div>
+
+    <div class="bill">
+      <h3>🧾 Order Summary</h3>
+      ${state.cart.map(c=>`<div class="brow"><span>${c.qty} × ${c.name}</span><span>${money(c.price*c.qty)}</span></div>`).join('')}
+      <div class="brow" style="margin-top:12px"><span>Delivery Fee</span><span>${money(this.deliveryFee())}</span></div>
+      <div class="brow"><span>Platform Fee</span><span>${money(PLATFORM_FEE)}</span></div>
+      ${this.discount()?`<div class="brow disc"><span>Promo Discount</span><span>− ${money(this.discount())}</span></div>`:''}
+      <div class="brow total"><span>Total Payable</span><span>${money(this.total())}</span></div>
+    </div>
+
+    <button class="bigbtn" onclick="app.placeOrder()">
+      ${state.user ? 'Place Order • '+money(this.total()) : '🔐 Login to Place Order'}
+    </button>`;
+  },
+
+  /* ---------------- TRACK ---------------- */
+  trackView(){
+    const o = state.orders.find(x=>x.id===state.trackId);
+    if(!o) return `<div class="empty"><div class="ic">📦</div><h3>No order selected</h3>
+      <button class="addbtn" onclick="app.go('orders')">View Orders</button></div>`;
+
+    const steps = [
+      {t:'Order Placed', d:'We received your order'},
+      {t:'Order Confirmed', d:'Restaurant accepted your order'},
+      {t:'Preparing Food', d:'Your food is being prepared'},
+      {t:'Out for Delivery', d:'Rider is on the way 🛵'},
+      {t:'Delivered', d:'Enjoy your meal! 🎉'}
+    ];
+    const s = o.status;
+
+    return `
+    <div class="track-hero">
+      <div class="ic">${s>=4?'✅':'🛵'}</div>
+      <h2>${s>=4?'Order Delivered!':(s>=3?'On the way!':'Preparing your food')}</h2>
+      <p>Order #${o.id} • ${s>=4?'Delivered':'Estimated 25–35 minutes'}</p>
+    </div>
+
+    <div class="steps">
+      ${steps.map((st,i)=>{
+        const cls = i<s ? 'done' : (i===s ? 'active' : '');
+        return `<div class="step ${cls}">
+          <div class="dot">${i<s?'✓':i+1}</div>
+          <div class="st"><h4>${st.t}</h4><p>${st.d}</p></div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="bill">
+      <h3>🧾 Order Details</h3>
+      <div class="brow"><span>Order ID</span><span style="color:var(--ink);font-weight:800">#${o.id}</span></div>
+      <div class="brow"><span>Restaurant</span><span style="color:var(--ink);font-weight:700">${o.emoji} ${o.restName}</span></div>
+      <div class="brow"><span>Payment</span><span style="color:var(--ink);font-weight:700">${o.pay==='cod'?'Cash on Delivery':o.pay==='card'?'Card':'Mobile Wallet'}</span></div>
+      <div class="brow"><span>Address</span><span style="color:var(--ink);font-weight:700;text-align:right;max-width:60%">${o.address}</span></div>
+      <div style="border-top:1px dashed var(--line);margin:13px 0"></div>
+      ${o.items.map(c=>`<div class="brow"><span>${c.qty} × ${c.name}</span><span>${money(c.price*c.qty)}</span></div>`).join('')}
+      <div class="brow"><span>Delivery + Platform Fee</span><span>${money(o.fee+o.platform)}</span></div>
+      ${o.discount?`<div class="brow disc"><span>Discount</span><span>− ${money(o.discount)}</span></div>`:''}
+      <div class="brow total"><span>Total Paid</span><span>${money(o.total)}</span></div>
+    </div>
+
+    <button class="bigbtn" onclick="app.reorder('${o.id}')">🔄 Order Again</button>
+    <button class="bigbtn" style="background:#fff;color:var(--ink);border:1.5px solid var(--line);margin-top:10px"
+      onclick="app.go('home')">Back to Home</button>`;
+  },
+
+  /* ---------------- ORDERS ---------------- */
+  ordersView(){
+    if(!state.orders.length){
+      return `<div class="empty"><div class="ic">📦</div><h3>No orders yet</h3>
+        <p>Your order history will appear here.</p>
+        <button class="addbtn" style="padding:13px 30px;font-size:14px" onclick="app.go('home')">Start Ordering</button></div>`;
+    }
+    return `
+    <div class="sec-title"><h2>📦 My Orders</h2><small>${state.orders.length} total</small></div>
+    ${state.orders.map(o=>{
+      const done = o.status>=4;
+      const dt = new Date(o.time).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      return `<div class="ocard" onclick="app.openOrder('${o.id}')">
+        <div class="oic">${o.emoji}</div>
+        <div class="ot">
+          <h4>${o.restName}</h4>
+          <p>${o.items.length} item${o.items.length>1?'s':''} • ${money(o.total)} • ${dt}</p>
+        </div>
+        <span class="ostatus ${done?'':'active'}">${done?'Delivered':'In Progress'}</span>
+      </div>`;
+    }).join('')}`;
+  },
+
+  /* ---------------- PROFILE ---------------- */
+  profileView(){
+    if(!state.user){
+      return `<div class="empty"><div class="ic">👤</div><h3>You're not logged in</h3>
+        <p>Login to see your profile and orders.</p>
+        <button class="addbtn" style="padding:13px 30px;font-size:14px" onclick="app.openAuth()">Login / Sign Up</button></div>`;
+    }
+    const totalSpent = state.orders.reduce((a,b)=>a+b.total,0);
+    return `
+    <div class="pcard">
+      <div class="avatar">👤</div>
+      <div>
+        <h2>${state.user.name}</h2>
+        <p>📞 ${state.user.phone}</p>
+        <p style="margin-top:3px;font-size:12px;opacity:.85">Member since ${state.user.joined}</p>
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:20px">
+      <div class="panel" style="text-align:center;margin:0">
+        <div style="font-size:26px;font-weight:800;color:var(--pink)">${state.orders.length}</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:4px">Total Orders</div>
+      </div>
+      <div class="panel" style="text-align:center;margin:0">
+        <div style="font-size:26px;font-weight:800;color:var(--pink)">${money(totalSpent)}</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:4px">Total Spent</div>
+      </div>
+      <div class="panel" style="text-align:center;margin:0">
+        <div style="font-size:26px;font-weight:800;color:var(--pink)">${this.cartCount()}</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:4px">Items in Cart</div>
+      </div>
+    </div>
+
+    <div class="prow" onclick="app.go('orders')"><span class="pic">📦</span> My Orders <span class="arrow">›</span></div>
+    <div class="prow" onclick="app.pickLocation()"><span class="pic">📍</span> Delivery Address <span class="arrow">›</span></div>
+    <div class="prow" onclick="app.go('cart')"><span class="pic">🛒</span> My Cart <span class="arrow">›</span></div>
+    <div class="prow" onclick="app.toast('📞 Support: 0800-FOOD (3663)')"><span class="pic">🎧</span> Help & Support <span class="arrow">›</span></div>
+    <div class="prow" onclick="app.toast('ℹ️ FoodExpress v1.0 — Demo App')"><span class="pic">ℹ️</span> About Us <span class="arrow">›</span></div>
+    <div class="prow" onclick="app.logout()" style="color:#d33"><span class="pic">🚪</span> Logout <span class="arrow">›</span></div>`;
+  }
+};
+
+/* =========================================================
+   BOOT
+   ========================================================= */
+app.init();
+</script>
+</body>
+</html>
